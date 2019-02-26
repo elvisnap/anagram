@@ -53,11 +53,14 @@ public class AnagramApplication {
 
 			if (character == '\n' || character == '\r') {
 				beggingOfNewLine = true;
-				String target = STRING_BUILDER.toString();
-				if (STRING_BUILDER.length() == sortedString.length() && isAnagram(sortedString, target) && !word.equalsIgnoreCase(target)) {
-					RESULT.add(target);
+				if (STRING_BUILDER.length() > 0) {
+					String target = STRING_BUILDER.toString();
+					if (STRING_BUILDER.length() == sortedString.length() && isAnagram(sortedString, target) && !word.equalsIgnoreCase(target)) {
+						RESULT.add(target);
+					}
+					STRING_BUILDER.setLength(0);
+
 				}
-				STRING_BUILDER.setLength(0);
 				readTillNewLine = false;
 				continue;
 			}

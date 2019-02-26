@@ -1,172 +1,119 @@
 import static java.nio.file.StandardOpenOption.READ;
+import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AnagramApplication2 {
 
-	private static String libraryPath = "C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt";
-	private static String word = "a cappella";
 	private static final ArrayList<String> RESULT = new ArrayList<>();
+	private static final StringBuilder STRING_BUILDER = new StringBuilder();
+	private static MappedByteBuffer BYTE_BUFFER;
 
 	public static void main(String[] args) throws Exception {
-		// initial();
-		long startTime = System.currentTimeMillis();
-		// new AnagramApplication().readFile5(libraryPath);
-		readFile20();
-		// RESULT.remove(word);
-		System.out.println(RESULT);
-		System.out.println(System.currentTimeMillis() - startTime);
+		long startTime = System.nanoTime();
+		loadDictionary("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt");
+		findAnograms("maja");
+		long endTime = System.nanoTime();
+		System.out.println(MICROSECONDS.convert(endTime - startTime, NANOSECONDS) + "," + String.join(",", RESULT));
 	}
 
-	public static String sortString(String word) {
+	private static String sortString(String word) {
 		char[] chars = word.toCharArray();
 		Arrays.sort(chars);
-		return new String(chars);
+		return new String(chars); // do we need new String
 	}
 
-	public static boolean isAnogram(String source, String target) {
+	private static boolean isAnagram(String source, String target) {
 		return source.equals(sortString(target));
 	}
 
-	public void readFile5(String path) throws Exception {
-		ExecutorService executor = Executors.newCachedThreadPool();
-		String source = sortString(word);
+	private static void loadDictionary(String path) throws Exception {
+		FileChannel fileChannel = (FileChannel) Files.newByteChannel(Paths.get(path), EnumSet.of(READ));
+		BYTE_BUFFER = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+	}
+
+	private static byte[] loadNextWord(int bytesToRead) {
+		byte[] dst = new byte[bytesToRead];
+		while (true) {
+			BYTE_BUFFER.get(dst, 0, bytesToRead);
+			if (isLineEndReached()) {
+				return dst;
+			}
+		}
+	}
+
+	private static boolean isLineEndReached() {
+		return BYTE_BUFFER.get() == '\r';
+	}
+
+	private static void readTillEndOfTheLine() {
+		byte b = BYTE_BUFFER.get();
+		while (!isLineEndReached()) {
+			b = BYTE_BUFFER.get();
+		}
+	}
+
+	private static boolean isLineEnd(byte b) {
+		return b == '\n' || b == '\r';
+	}
+
+	private static void findAnograms(String word) throws Exception {
+		String sortedString = sortString(word.toLowerCase());
+		char lastChar = sortedString.charAt(sortedString.length() - 1);
 
 		try {
-			Path pathToRead = Paths.get(path);
 
-			FileChannel fileChannel = (FileChannel) Files.newByteChannel(pathToRead, EnumSet.of(READ));
+			while (BYTE_BUFFER.hasRemaining()) {
+				byte[] nextWord = loadNextWord(sortedString.length());
+				// System.out.println(readNextWord);
 
-			MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-			StringBuilder builder = new StringBuilder();
-
-			while (mappedByteBuffer.hasRemaining()) {
-				char character = (char) mappedByteBuffer.get();
-
-				if (character == '\n' || character == '\r') {
-					if (builder.length() != 0) {
-						// executor.execute(new MyRunnable(source, builder.toString()));
-						builder.setLength(0);
-					}
-				} else {
-					builder.append(character);
-				}
 			}
-		} catch (Exception e) {
+		} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
 			e.printStackTrace();
 		}
-	}
 
-	public static class MyRunnable implements Runnable {
-		private String source;
-		private String target;
-
-		public MyRunnable(String source, String target) {
-			this.source = source;
-			this.target = target;
-		}
-
-		@Override
-		public void run() {
-			if (isAnogram(source, target)) {
-				RESULT.add(target);
-			}
-		}
-	}
-
-	public static void readFileNew38() throws Exception {
-		BufferedReader reader = Files.newBufferedReader(Paths.get(libraryPath), StandardCharsets.ISO_8859_1);
-		while (reader.ready()) {
-			System.out.println(reader.readLine());
-		}
-	}
-
-	public static void readFileNew35() throws Exception {
-		InputStream in = new BufferedInputStream(new FileInputStream(libraryPath));
-
-		StringBuilder builder = new StringBuilder();
-		int bite = 0;
-		while (bite >= 0) {
-			bite = in.read();
-			char character = (char) bite;
-			if (character == '\n' || character == '\r') {
-				// if (builder.length() > 0 && isAnogram(word1, builder.toString())) {
-				// System.out.println(builder.toString());
-				// }
-				builder.setLength(0);
-			} else {
-				builder.append(character);
-			}
-		}
-	}
-
-	public static void readFile40() throws Exception {
-		String word1 = sortString(word);
-
-		try (BufferedReader br = Files.newBufferedReader(Paths.get(libraryPath), StandardCharsets.ISO_8859_1)) {
-			while (br.ready()) {
-				br.readLine();
-			}
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void readFile20() throws Exception {
-		String word1 = sortString(word);
-		char lastCharOfSourceString = word1.charAt(word1.length() - 1);
-		Path pathToRead = Paths.get(libraryPath);
-
-		FileChannel fileChannel = (FileChannel) Files.newByteChannel(pathToRead, EnumSet.of(READ));
-
-		MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
-		StringBuilder builder = new StringBuilder();
 		boolean beggingOfNewLine = false;
 		boolean readTillNewLine = false;
-		for (int i = 0; i < mappedByteBuffer.limit(); i++) {
-			char character = (char) (mappedByteBuffer.get() & 0xFF);
-
-			if (character == '\n' || character == '\r') {
-				beggingOfNewLine = true;
-				String target = builder.toString();
-				if (builder.length() == word1.length() && isAnogram(word1, target)) {
-					RESULT.add(target);
-				}
-				builder.setLength(0);
-				readTillNewLine = false;
-				continue;
-			}
-			if (readTillNewLine) {
-				continue;
-			}
-			if (beggingOfNewLine) {
-				if (character > lastCharOfSourceString) {
-					break;
-				}
-				beggingOfNewLine = false;
-			}
-			builder.append(character);
-			if (builder.length() > word1.length()) {
-				readTillNewLine = true;
-				builder.setLength(0);
-			}
-		}
+		// for (int i = 0; i < BYTE_BUFFER.limit(); i++) {
+		// char character = (char) (BYTE_BUFFER.get() & 0xFF);
+		//
+		// if (beggingOfNewLine && character > lastChar) {
+		// break;
+		// } else {
+		// beggingOfNewLine = false;
+		// }
+		//
+		// if (character == '\n' || character == '\r') {
+		// beggingOfNewLine = true;
+		// String target = STRING_BUILDER.toString();
+		// if (STRING_BUILDER.length() == sortedString.length() &&
+		// isAnagram(sortedString, target) && !word.equalsIgnoreCase(target)) {
+		// RESULT.add(target);
+		// }
+		// STRING_BUILDER.setLength(0);
+		// readTillNewLine = false;
+		// continue;
+		// }
+		// if (readTillNewLine) {
+		// continue;
+		// }
+		// if (sortedString.indexOf(toLowerCase(character)) == -1 ||
+		// STRING_BUILDER.length() + 1 > sortedString.length()) {
+		// readTillNewLine = true;
+		// STRING_BUILDER.setLength(0);
+		// } else {
+		// STRING_BUILDER.append(character);
+		// }
+		//
+		// }
 	}
 
 }
