@@ -14,25 +14,24 @@ import java.util.EnumSet;
 public class AnagramApplication2 {
 
 	private static final ArrayList<String> RESULT = new ArrayList<>();
-	private static final StringBuilder STRING_BUILDER = new StringBuilder();
 	private static MappedByteBuffer BYTE_BUFFER;
+	private static String searchWord;
+	private static byte[] searchBytes;
 
 	public static void main(String[] args) throws Exception {
 		long startTime = System.nanoTime();
+		searchWord = "maja";
+		searchBytes = searchWord.getBytes();
+		Arrays.sort(searchBytes);
 		loadDictionary("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt");
-		findAnograms("maja");
+		findAnograms();
 		long endTime = System.nanoTime();
 		System.out.println(MICROSECONDS.convert(endTime - startTime, NANOSECONDS) + "," + String.join(",", RESULT));
 	}
 
-	private static String sortString(String word) {
-		char[] chars = word.toCharArray();
-		Arrays.sort(chars);
-		return new String(chars); // do we need new String
-	}
-
-	private static boolean isAnagram(String source, String target) {
-		return source.equals(sortString(target));
+	private static boolean isAnagram(byte[] target) {
+		Arrays.sort(target);
+		return Arrays.equals(searchBytes, target);
 	}
 
 	private static void loadDictionary(String path) throws Exception {
@@ -46,74 +45,44 @@ public class AnagramApplication2 {
 			BYTE_BUFFER.get(dst, 0, bytesToRead);
 			if (isLineEndReached()) {
 				return dst;
+			} else {
+				readTillEndOfTheLine();
 			}
 		}
 	}
 
 	private static boolean isLineEndReached() {
-		return BYTE_BUFFER.get() == '\r';
+		byte b = BYTE_BUFFER.get();
+		if (b == '\r') {
+			BYTE_BUFFER.get();
+			return true;
+		}
+		if (b == '\n') {
+			return true;
+		}
+		return false;
 	}
 
 	private static void readTillEndOfTheLine() {
-		byte b = BYTE_BUFFER.get();
 		while (!isLineEndReached()) {
-			b = BYTE_BUFFER.get();
 		}
 	}
 
-	private static boolean isLineEnd(byte b) {
-		return b == '\n' || b == '\r';
-	}
-
-	private static void findAnograms(String word) throws Exception {
-		String sortedString = sortString(word.toLowerCase());
-		char lastChar = sortedString.charAt(sortedString.length() - 1);
+	private static void findAnograms() throws Exception {
+		// String sortedString = sort(searchWord.toLowerCase());
+		// char lastChar = sortedString.charAt(sortedString.length() - 1);
 
 		try {
 
 			while (BYTE_BUFFER.hasRemaining()) {
-				byte[] nextWord = loadNextWord(sortedString.length());
-				// System.out.println(readNextWord);
-
+				byte[] nextWord = loadNextWord(searchWord.length());
+				if (isAnagram(nextWord.clone())) {
+					RESULT.add(new String(nextWord));
+				}
 			}
 		} catch (IndexOutOfBoundsException | BufferUnderflowException e) {
-			e.printStackTrace();
+			// nothing to do
 		}
-
-		boolean beggingOfNewLine = false;
-		boolean readTillNewLine = false;
-		// for (int i = 0; i < BYTE_BUFFER.limit(); i++) {
-		// char character = (char) (BYTE_BUFFER.get() & 0xFF);
-		//
-		// if (beggingOfNewLine && character > lastChar) {
-		// break;
-		// } else {
-		// beggingOfNewLine = false;
-		// }
-		//
-		// if (character == '\n' || character == '\r') {
-		// beggingOfNewLine = true;
-		// String target = STRING_BUILDER.toString();
-		// if (STRING_BUILDER.length() == sortedString.length() &&
-		// isAnagram(sortedString, target) && !word.equalsIgnoreCase(target)) {
-		// RESULT.add(target);
-		// }
-		// STRING_BUILDER.setLength(0);
-		// readTillNewLine = false;
-		// continue;
-		// }
-		// if (readTillNewLine) {
-		// continue;
-		// }
-		// if (sortedString.indexOf(toLowerCase(character)) == -1 ||
-		// STRING_BUILDER.length() + 1 > sortedString.length()) {
-		// readTillNewLine = true;
-		// STRING_BUILDER.setLength(0);
-		// } else {
-		// STRING_BUILDER.append(character);
-		// }
-		//
-		// }
 	}
 
 }
