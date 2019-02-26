@@ -1,0 +1,19 @@
+target/
+node_modules/
+*.jar
+*.war
+*.ear
+*.class
+
+.settings/
+.classpath
+.project
+
+
+# eclipse specific git ignore
+.metadata
+.recommenders
+*META-INF*
+bin/**
+tmp/**
+tmp/**/*
