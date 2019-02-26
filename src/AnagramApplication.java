@@ -29,7 +29,7 @@ public class AnagramApplication {
 		return new String(chars); // do we need new String
 	}
 
-	public static boolean isAnogram(String source, String target) {
+	public static boolean isAnagram(String source, String target) {
 		return source.equals(sortString(target));
 	}
 
@@ -54,7 +54,7 @@ public class AnagramApplication {
 			if (character == '\n' || character == '\r') {
 				beggingOfNewLine = true;
 				String target = STRING_BUILDER.toString();
-				if (STRING_BUILDER.length() == sortedString.length() && isAnogram(sortedString, target) && !word.equalsIgnoreCase(target)) {
+				if (STRING_BUILDER.length() == sortedString.length() && isAnagram(sortedString, target) && !word.equalsIgnoreCase(target)) {
 					RESULT.add(target);
 				}
 				STRING_BUILDER.setLength(0);
