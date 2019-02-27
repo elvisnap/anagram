@@ -17,7 +17,7 @@ import java.util.EnumSet;
 
 public class AnagramApplication {
 
-	private static final String ENCODING = "Windows-1257";
+	private static final String ENCODING = "windows-1257";
 	private MappedByteBuffer byteBuffer;
 	private byte[] searchBytes;
 	private boolean checkForUpperCase = true;
@@ -26,9 +26,8 @@ public class AnagramApplication {
 
 	public static void main(String[] args) throws Exception {
 		long startTime = nanoTime();
-
-		// new AnagramApplication().exec(args[0], args[1]);
-		ArrayList<String> result = new AnagramApplication().exec("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt", "Å¾rÃ¼ii");
+		ArrayList<String> result = new AnagramApplication().exec(args[0], args[1]);
+//		ArrayList<String> result = new AnagramApplication().exec("C:\\Users\\Nemo\\Desktop\\lemmad.txt", "þrüii");
 		System.out.println(MICROSECONDS.convert(nanoTime() - startTime, NANOSECONDS) + "," + String.join(",", result));
 	}
 
@@ -38,7 +37,7 @@ public class AnagramApplication {
 		ArrayList<String> result = findAnograms();
 		result.remove(wordToSearch);
 		return result;
-	}// on-line, Å¾anr
+	}
 
 	private void prepareSearchCriteria(String word) throws UnsupportedEncodingException {
 		searchBytes = word.toLowerCase().getBytes(ENCODING);

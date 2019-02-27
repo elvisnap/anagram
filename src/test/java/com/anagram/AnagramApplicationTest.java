@@ -33,18 +33,18 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramWithSpecialChar() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "abijud√µ");
+		ArrayList<String> result = app.exec(filePath, "abiıjud");
 
-		Assertions.assertThat(result).contains("abij√µud");
+		Assertions.assertThat(result).contains("abijıud");
 	}
 
 	@Test
 	public void shouldNotIncludeSearchWordInResult() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "abij√µud");
+		ArrayList<String> result = app.exec(filePath, "abijıud");
 
-		assertThat(result).doesNotContain("abij√µud");
+		assertThat(result).doesNotContain("abijıud");
 	}
 
 	@Test
@@ -93,12 +93,12 @@ public class AnagramApplicationTest {
 	}
 
 	@Test
-	public void shouldFindAnagramsWith≈Ω() throws Exception {
+	public void shouldFindAnagramsWithﬁ() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "≈æarn");
+		ArrayList<String> result = app.exec(filePath, "˛arn");
 
-		Assertions.assertThat(result).contains("≈æanr");
+		Assertions.assertThat(result).contains("˛anr");
 	}
 
 }
