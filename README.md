@@ -27,4 +27,4 @@ Output (duration,list,of,anagrams,found):
 
 ```
 43978,jaam,ajam,jama
-```fullPathToDictionaryFile
+```
