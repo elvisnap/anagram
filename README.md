@@ -14,13 +14,13 @@ mvn package
 ## Usage
 
 ```
-java -jar .\target\anagram-search-0.0.1-SNAPSHOT.jar {fullPathToDictionaryFile} {searchWord}
+java -jar .\target\anagram-search-0.0.1.jar {fullPathToDictionaryFile} {searchWord}
 ```
 
 Example
 
 ```
-java -jar .\target\anagram-search-0.0.1-SNAPSHOT.jar C:\dictionary.txt maja 
+java -jar .\target\anagram-search-0.0.1.jar C:\dictionary.txt maja 
 ```
 
 Output (duration,list,of,anagrams,found):
