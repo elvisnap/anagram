@@ -29,7 +29,6 @@ public class AnagramApplication {
 	public static void main(String[] args) throws Exception {
 		long startTime = nanoTime();
 		Set<String> result = new AnagramApplication().exec(args[0], args[1]);
-		//Set<String> result = new AnagramApplication().exec("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt", "Egiptuse pimedsu");
 		long stopTime = nanoTime();
 		System.out.println(MICROSECONDS.convert(stopTime - startTime, NANOSECONDS) + "," + String.join(",", result));
 	}
