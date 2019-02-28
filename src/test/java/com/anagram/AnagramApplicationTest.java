@@ -3,7 +3,7 @@ package com.anagram;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramWithSpecialChar() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "abiõjud");
+		Set<String> result = app.exec(filePath, "abiõjud");
 
 		Assertions.assertThat(result).contains("abijõud");
 	}
@@ -42,7 +42,7 @@ public class AnagramApplicationTest {
 	public void shouldNotIncludeSearchWordInResult() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "abijõud");
+		Set<String> result = app.exec(filePath, "abijõud");
 
 		assertThat(result).doesNotContain("abijõud");
 	}
@@ -51,7 +51,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramInAnyCase() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "aDSi");
+		Set<String> result = app.exec(filePath, "aDSi");
 
 		Assertions.assertThat(result).contains("AIDS");
 	}
@@ -60,7 +60,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramInUpperCase() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "VPI");
+		Set<String> result = app.exec(filePath, "VPI");
 
 		Assertions.assertThat(result).contains("VIP");
 	}
@@ -69,7 +69,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagrams() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "maja");
+		Set<String> result = app.exec(filePath, "maja");
 
 		Assertions.assertThat(result).contains("ajam");
 	}
@@ -78,7 +78,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramsWithSpace() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "a cppellaa");
+		Set<String> result = app.exec(filePath, "a cppellaa");
 
 		Assertions.assertThat(result).contains("a cappella");
 	}
@@ -87,7 +87,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramsWithHypen() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "a-vtamiini");
+		Set<String> result = app.exec(filePath, "a-vtamiini");
 
 		Assertions.assertThat(result).contains("a-vitamiin");
 	}
@@ -96,7 +96,7 @@ public class AnagramApplicationTest {
 	public void shouldFindAnagramsWithÞ() throws Exception {
 		AnagramApplication app = new AnagramApplication();
 
-		ArrayList<String> result = app.exec(filePath, "þarn");
+		Set<String> result = app.exec(filePath, "þarn");
 
 		Assertions.assertThat(result).contains("þanr");
 	}

@@ -11,43 +11,47 @@ import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AnagramApplication {
 
 	private static final String ENCODING = "windows-1257";
+	private static final int CR = 13;
+	private static final int LF = 10;
 	private MappedByteBuffer byteBuffer;
-	private byte[] searchBytes;
+	private byte[] source;
+	private byte[] potentialTarget;
 	private boolean checkForUpperCase = true;
-	private int cr = 10;
-	private int lf = 13;
 
 	public static void main(String[] args) throws Exception {
 		long startTime = nanoTime();
-		ArrayList<String> result = new AnagramApplication().exec(args[0], args[1]);
-//		ArrayList<String> result = new AnagramApplication().exec("C:\\Users\\Nemo\\Desktop\\lemmad.txt", "þrüii");
-		System.out.println(MICROSECONDS.convert(nanoTime() - startTime, NANOSECONDS) + "," + String.join(",", result));
+		Set<String> result = new AnagramApplication().exec(args[0], args[1]);
+		//Set<String> result = new AnagramApplication().exec("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt", "Egiptuse pimedsu");
+		long stopTime = nanoTime();
+		System.out.println(MICROSECONDS.convert(stopTime - startTime, NANOSECONDS) + "," + String.join(",", result));
 	}
 
-	public ArrayList<String> exec(String path, String wordToSearch) throws Exception {
+	public Set<String> exec(String path, String wordToSearch) throws Exception {
 		loadDictionary(path);
-		prepareSearchCriteria(wordToSearch);
-		ArrayList<String> result = findAnograms();
+		init(wordToSearch);
+		Set<String> result = findAnograms();
 		result.remove(wordToSearch);
 		return result;
 	}
 
-	private void prepareSearchCriteria(String word) throws UnsupportedEncodingException {
-		searchBytes = word.toLowerCase().getBytes(ENCODING);
-		Arrays.sort(searchBytes);
+	private void init(String wordToSearch) throws UnsupportedEncodingException {
+		source = wordToSearch.toLowerCase().getBytes();
+		Arrays.sort(source);
+		potentialTarget = new byte[source.length];
 	}
 
 	private boolean isAnagram(byte[] target) {
 		Arrays.sort(target);
-		for (int i = 0; i < searchBytes.length; i++) {
-			if (searchBytes[i] != target[i]) {
+		for (int i = 0; i < source.length; i++) {
+			if (source[i] != target[i]) {
 				return false;
 			}
 		}
@@ -74,18 +78,16 @@ public class AnagramApplication {
 		byteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
 	}
 
-	private byte[] loadNextWord(int bytesToRead) {
-		byte[] dst = new byte[bytesToRead];
-
+	private byte[] loadNextWord() {
 		while (true) {
-			for (int i = 0; i < dst.length; i++) {
-				dst[i] = byteBuffer.get();
-				if (dst[i] == lf || dst[i] == cr) {
+			for (int i = 0; i < potentialTarget.length; i++) {
+				potentialTarget[i] = byteBuffer.get();
+				if (potentialTarget[i] == CR || potentialTarget[i] == LF) {
 					i = -1;
 				}
 			}
 			if (isLineEndReached()) {
-				return dst;
+				return potentialTarget;
 			} else {
 				readTillEndOfTheLine();
 			}
@@ -94,11 +96,7 @@ public class AnagramApplication {
 
 	private boolean isLineEndReached() {
 		byte b = byteBuffer.get();
-		if (b == '\r') {
-			byteBuffer.get();
-			return true;
-		}
-		if (b == '\n') {
+		if (b == CR || b == LF) {
 			return true;
 		}
 		return false;
@@ -109,14 +107,13 @@ public class AnagramApplication {
 		}
 	}
 
-	private ArrayList<String> findAnograms() throws Exception {
-		ArrayList<String> result = new ArrayList<>();
-		// char lastChar = sortedString.charAt(sortedString.length() - 1);
+	private Set<String> findAnograms() throws Exception {
+		Set<String> result = new HashSet<>();
 
 		try {
 
 			while (byteBuffer.hasRemaining()) {
-				byte[] nextWord = loadNextWord(searchBytes.length);
+				byte[] nextWord = loadNextWord();
 				byte[] targetClone = nextWord.clone();
 				fixUpperCase(targetClone);
 				if (isAnagram(targetClone)) {
