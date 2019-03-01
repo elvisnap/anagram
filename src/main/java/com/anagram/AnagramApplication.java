@@ -1,18 +1,15 @@
 package com.anagram;
 
 import static java.lang.System.nanoTime;
-import static java.nio.file.StandardOpenOption.READ;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferUnderflowException;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,15 +18,18 @@ public class AnagramApplication {
 	private static final String ENCODING = "windows-1257";
 	private static final int CR = 13;
 	private static final int LF = 10;
-	private MappedByteBuffer byteBuffer;
+	// private MappedByteBuffer byteBuffer;
 	private byte[] source;
 	private byte[] potentialTarget;
+	private byte[] fileData;
+	private int bytePosition = 0;
+	private byte current;
 	private boolean checkForUpperCase = true;
 
 	public static void main(String[] args) throws Exception {
 		long startTime = nanoTime();
 		Set<String> result = new AnagramApplication().exec(args[0], args[1]);
-		//Set<String> result = new AnagramApplication().exec("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt", "Egiptuse pimedsu");
+		// Set<String> result = new AnagramApplication().exec("C:\\Users\\elvis.napritson\\Desktop\\lemmad.txt", "Egiptuse pimedsu");
 		long stopTime = nanoTime();
 		System.out.println(MICROSECONDS.convert(stopTime - startTime, NANOSECONDS) + "," + String.join(",", result));
 	}
@@ -40,6 +40,7 @@ public class AnagramApplication {
 		Set<String> result = findAnograms();
 		result.remove(wordToSearch);
 		return result;
+		// return new HashSet<>();
 	}
 
 	private void init(String wordToSearch) throws UnsupportedEncodingException {
@@ -74,14 +75,22 @@ public class AnagramApplication {
 	}
 
 	private void loadDictionary(String path) throws Exception {
-		FileChannel fileChannel = (FileChannel) Files.newByteChannel(Paths.get(path), EnumSet.of(READ));
-		byteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+		// FileChannel fileChannel = new RandomAccessFile(new File(path), "r").getChannel();
+		// FileChannel fileChannel = (FileChannel) Files.newByteChannel(Paths.get(path), EnumSet.of(READ));
+		// byteBuffer = fileChannel.map(FileChannel.MapMode.READ_ONLY, 0, fileChannel.size());
+		// byte[] bytes = Files.readAllBytes(Paths.get(path));
+		File file = new File(path);
+		fileData = new byte[(int) file.length()];
+		DataInputStream dis = new DataInputStream(new FileInputStream(file));
+		dis.readFully(fileData);
+		dis.close();
 	}
 
 	private byte[] loadNextWord() {
 		while (true) {
 			for (int i = 0; i < potentialTarget.length; i++) {
-				potentialTarget[i] = byteBuffer.get();
+				readNextByte();
+				potentialTarget[i] = current;
 				if (potentialTarget[i] == CR || potentialTarget[i] == LF) {
 					i = -1;
 				}
@@ -94,9 +103,14 @@ public class AnagramApplication {
 		}
 	}
 
+	private void readNextByte() {
+		current = fileData[bytePosition];
+		bytePosition++;
+	}
+
 	private boolean isLineEndReached() {
-		byte b = byteBuffer.get();
-		if (b == CR || b == LF) {
+		readNextByte();
+		if (current == CR || current == LF) {
 			return true;
 		}
 		return false;
@@ -112,7 +126,7 @@ public class AnagramApplication {
 
 		try {
 
-			while (byteBuffer.hasRemaining()) {
+			while (true) {
 				byte[] nextWord = loadNextWord();
 				byte[] targetClone = nextWord.clone();
 				fixUpperCase(targetClone);
