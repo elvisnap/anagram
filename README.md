@@ -8,7 +8,7 @@ Search is case-insensitive.
 Use Maven to create jar file.
 
 ```
-mvn package
+mvn clean package
 ```
 
 ## Usage

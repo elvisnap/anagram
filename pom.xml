@@ -28,7 +28,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>com.anagram.AnagramApplication</mainClass>
+							<mainClass>com.anagram.AnagramSearch</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
